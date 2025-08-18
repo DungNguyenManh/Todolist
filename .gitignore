@@ -1,5 +1,3 @@
-node_modules/
-**/node_modules/
-frontend/.next/
-backend/dist/
-*.env
+.env
+node_modules
+.next
