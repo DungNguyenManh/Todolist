@@ -15,37 +15,41 @@ export class UsersService {
     if (exists) throw new ConflictException('Email already used');
     const passwordHash = await bcrypt.hash(dto.password, 10);
     const user = await this.userModel.create({ email: dto.email, passwordHash, role: 'user' });
-    return { id: user.id, email: user.email, role: user.role };
+    return { id: user._id.toString(), email: user.email, role: user.role };
   }
 
   async findAll() {
-    return this.userModel.find({}, { email: 1 }).lean();
+    const users = await this.userModel.find({}, { email: 1, role: 1 }).lean();
+    return users.map(user => ({
+      id: user._id.toString(),
+      email: user.email,
+      role: user.role
+    }));
   }
 
-  async findOne(id: number) {
-    // controller đang truyền số; nếu bạn dùng Mongo, đổi controller nhận string
-    const doc = await this.userModel.findById(id as unknown as string, { email: 1 }).lean();
+  async findOne(id: string) {
+    const doc = await this.userModel.findById(id, { email: 1, role: 1 }).lean();
     if (!doc) throw new NotFoundException('User not found');
-    return doc;
+    return { id: doc._id.toString(), email: doc.email, role: doc.role };
   }
 
-  async update(id: number, dto: UpdateUserDto) {
+  async update(id: string, dto: UpdateUserDto) {
     const $set: Record<string, unknown> = {};
     if (dto.email !== undefined) $set.email = dto.email;
     if ((dto as any).password !== undefined) {
       $set.passwordHash = await bcrypt.hash((dto as any).password, 10);
     }
     const doc = await this.userModel
-      .findByIdAndUpdate(id as unknown as string, { $set }, { new: true, projection: { email: 1 } })
+      .findByIdAndUpdate(id, { $set }, { new: true, projection: { email: 1, role: 1 } })
       .lean();
     if (!doc) throw new NotFoundException('User not found');
-    return doc;
+    return { id: doc._id.toString(), email: doc.email, role: doc.role };
   }
 
-  async remove(id: number) {
-    const doc = await this.userModel.findByIdAndDelete(id as unknown as string, { projection: { email: 1 } }).lean();
+  async remove(id: string) {
+    const doc = await this.userModel.findByIdAndDelete(id, { projection: { email: 1, role: 1 } }).lean();
     if (!doc) throw new NotFoundException('User not found');
-    return doc;
+    return { id: doc._id.toString(), email: doc.email, role: doc.role };
   }
 
   // Dùng cho Auth
@@ -53,8 +57,9 @@ export class UsersService {
     return this.userModel.findOne({ email }).exec();
   }
 
-
   async setRole(userId: string, role: 'user' | 'admin') {
-    return this.userModel.findByIdAndUpdate(userId, { $set: { role } }, { new: true, projection: { email: 1, role: 1 } }).lean();
+    const doc = await this.userModel.findByIdAndUpdate(userId, { $set: { role } }, { new: true, projection: { email: 1, role: 1 } }).lean();
+    if (!doc) return null;
+    return { id: doc._id.toString(), email: doc.email, role: doc.role };
   }
 }

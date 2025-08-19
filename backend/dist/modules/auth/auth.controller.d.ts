@@ -5,15 +5,11 @@ export declare class AuthController {
     register(body: {
         email: string;
         password: string;
-    }): Promise<{
-        accessToken: string;
-        refreshToken: string;
-    }>;
+    }): Promise<import("../../common/interfaces/api-response.interface").ApiResponse<import("../../common/interfaces/api-response.interface").UserResponse>>;
     login(body: {
         email: string;
         password: string;
-    }): Promise<{
-        accessToken: string;
-        refreshToken: string;
+    }): Promise<import("../../common/interfaces/api-response.interface").ApiResponse<import("../../common/interfaces/api-response.interface").UserResponse> & {
+        token: string;
     }>;
 }

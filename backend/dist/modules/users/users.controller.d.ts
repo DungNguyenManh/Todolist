@@ -5,36 +5,28 @@ export declare class UsersController {
     private readonly usersService;
     constructor(usersService: UsersService);
     create(createUserDto: CreateUserDto): Promise<{
-        id: any;
+        id: string;
         email: string;
         role: "user" | "admin";
     }>;
-    findAll(): Promise<(import("mongoose").FlattenMaps<import("mongoose").Document<unknown, {}, import("./schemas/user.schema").User, {}, {}> & import("./schemas/user.schema").User & {
-        _id: import("mongoose").Types.ObjectId;
-    } & {
-        __v: number;
-    }> & Required<{
-        _id: import("mongoose").Types.ObjectId;
-    }>)[]>;
-    findOne(id: string): Promise<import("mongoose").FlattenMaps<import("mongoose").Document<unknown, {}, import("./schemas/user.schema").User, {}, {}> & import("./schemas/user.schema").User & {
-        _id: import("mongoose").Types.ObjectId;
-    } & {
-        __v: number;
-    }> & Required<{
-        _id: import("mongoose").Types.ObjectId;
-    }>>;
-    update(id: string, updateUserDto: UpdateUserDto): Promise<import("mongoose").FlattenMaps<import("mongoose").Document<unknown, {}, import("./schemas/user.schema").User, {}, {}> & import("./schemas/user.schema").User & {
-        _id: import("mongoose").Types.ObjectId;
-    } & {
-        __v: number;
-    }> & Required<{
-        _id: import("mongoose").Types.ObjectId;
-    }>>;
-    remove(id: string): Promise<import("mongoose").FlattenMaps<import("mongoose").Document<unknown, {}, import("./schemas/user.schema").User, {}, {}> & import("./schemas/user.schema").User & {
-        _id: import("mongoose").Types.ObjectId;
-    } & {
-        __v: number;
-    }> & Required<{
-        _id: import("mongoose").Types.ObjectId;
-    }>>;
+    findAll(req: any): Promise<{
+        id: string;
+        email: string;
+        role: "user" | "admin";
+    }[]>;
+    findOne(req: any, id: string): Promise<{
+        id: string;
+        email: string;
+        role: "user" | "admin";
+    }>;
+    update(req: any, id: string, updateUserDto: UpdateUserDto): Promise<{
+        id: string;
+        email: string;
+        role: "user" | "admin";
+    }>;
+    remove(req: any, id: string): Promise<{
+        id: string;
+        email: string;
+        role: "user" | "admin";
+    }>;
 }

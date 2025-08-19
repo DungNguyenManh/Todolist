@@ -14,6 +14,7 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UsersController = void 0;
 const common_1 = require("@nestjs/common");
+const passport_1 = require("@nestjs/passport");
 const users_service_1 = require("./users.service");
 const create_user_dto_1 = require("./dto/create-user.dto");
 const update_user_dto_1 = require("./dto/update-user.dto");
@@ -25,17 +26,42 @@ let UsersController = class UsersController {
     create(createUserDto) {
         return this.usersService.create(createUserDto);
     }
-    findAll() {
+    async findAll(req) {
+        const user = req.user;
+        if (user.role !== 'admin') {
+            throw new common_1.ForbiddenException('Access denied. Admin role required to view all users.');
+        }
         return this.usersService.findAll();
     }
-    findOne(id) {
-        return this.usersService.findOne(+id);
+    async findOne(req, id) {
+        const user = req.user;
+        if (user.role === 'admin') {
+            return this.usersService.findOne(id);
+        }
+        if (user.userId !== id) {
+            throw new common_1.ForbiddenException('Access denied. You can only view your own profile.');
+        }
+        return this.usersService.findOne(id);
     }
-    update(id, updateUserDto) {
-        return this.usersService.update(+id, updateUserDto);
+    async update(req, id, updateUserDto) {
+        const user = req.user;
+        if (user.role === 'admin') {
+            return this.usersService.update(id, updateUserDto);
+        }
+        if (user.userId !== id) {
+            throw new common_1.ForbiddenException('Access denied. You can only update your own profile.');
+        }
+        return this.usersService.update(id, updateUserDto);
     }
-    remove(id) {
-        return this.usersService.remove(+id);
+    async remove(req, id) {
+        const user = req.user;
+        if (user.role === 'admin') {
+            return this.usersService.remove(id);
+        }
+        if (user.userId !== id) {
+            throw new common_1.ForbiddenException('Access denied. You can only delete your own account.');
+        }
+        return this.usersService.remove(id);
     }
 };
 exports.UsersController = UsersController;
@@ -48,33 +74,38 @@ __decorate([
 ], UsersController.prototype, "create", null);
 __decorate([
     (0, common_1.Get)(),
+    __param(0, (0, common_1.Req)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
-    __metadata("design:returntype", void 0)
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
 ], UsersController.prototype, "findAll", null);
 __decorate([
     (0, common_1.Get)(':id'),
-    __param(0, (0, common_1.Param)('id')),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", void 0)
+    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:returntype", Promise)
 ], UsersController.prototype, "findOne", null);
 __decorate([
     (0, common_1.Patch)(':id'),
-    __param(0, (0, common_1.Param)('id')),
-    __param(1, (0, common_1.Body)()),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Param)('id')),
+    __param(2, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, update_user_dto_1.UpdateUserDto]),
-    __metadata("design:returntype", void 0)
+    __metadata("design:paramtypes", [Object, String, update_user_dto_1.UpdateUserDto]),
+    __metadata("design:returntype", Promise)
 ], UsersController.prototype, "update", null);
 __decorate([
     (0, common_1.Delete)(':id'),
-    __param(0, (0, common_1.Param)('id')),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", void 0)
+    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:returntype", Promise)
 ], UsersController.prototype, "remove", null);
 exports.UsersController = UsersController = __decorate([
+    (0, common_1.UseGuards)((0, passport_1.AuthGuard)('jwt')),
     (0, common_1.Controller)('users'),
     __metadata("design:paramtypes", [users_service_1.UsersService])
 ], UsersController);
